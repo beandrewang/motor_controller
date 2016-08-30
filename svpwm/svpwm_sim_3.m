@@ -60,10 +60,10 @@ Cangle = f * Tpwm * 360;
 
 # pwm precision
 Ppwm = 0.01;
-
+index = 0;
 for  t1 = 0 : Tpwm : Tcycle - Tpwm
   # calculate the angle theta
-  theta = 2 * pi * f * t1;
+  theta = 2 * pi * f * t1;  
   
   # calculate current pwm period
   period = fix(t1 / Tpwm);
@@ -76,6 +76,17 @@ for  t1 = 0 : Tpwm : Tcycle - Tpwm
   
   start_index = period / Ppwm + 1;
   end_index = (period + 1) / Ppwm;
+  
+  Vd = Vref * cos(theta);
+  Vq = Vref * sin(theta);
+  V0 = 0;
+  
+  index = index + 1;
+  Va(index) =  Vd * cos(theta) - Vq * sin(theta);
+  Vb(index) = Vd * cos(theta - 2 * pi / 3) - Vq * sin(theta - 2 * pi / 3);
+  Vc(index) = Vd * cos(theta + 2 * pi / 3) - Vq * sin(theta + 2 * pi / 3);
+  alpha(index) = theta / 2 / pi * 360;
+
   
   switch(sector)
     case {1}
@@ -320,6 +331,12 @@ title('SVPWM');
 legend('a', 'b', 'c');
 
 figure 4;
-d = a - b;
-plot(t2, d);
+plot(alpha, Va, 'r');
+hold on;
+plot(alpha, Vb, 'g');
+hold on;
+plot(alpha, Vc, 'b');
+title('3 Phase Voltage relationship');
+legend('Va', 'Vb', 'Vc');
+
 
